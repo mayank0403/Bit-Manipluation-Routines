@@ -9,3 +9,5 @@ Scenarios where BitManCe can be useful:
 - When you want to print the 3 components, namely sign bit, mantissa and exponent, of an IEEE754 standard float number.
 
 The functions should be compatible with both endian representations.
+
+Instructions on how to use the functions can be found in the comments above function definitions.
