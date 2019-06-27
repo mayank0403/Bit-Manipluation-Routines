@@ -117,7 +117,18 @@ void gen_float_from_man_exp(int sign /*1 -ve*/, int exponent /*<2pow8-- actual e
 	}
 }
 
-void gen_random_valid_float(){
-
+float gen_random_valid_float(){
+	int random_sign, random_exponent, random_mantissa;
+	random_sign = rand()%2; //1 bit
+	random_exponent = rand()%(256); //8 bits
+	while(random_exponent == 0 || random_exponent == 255){
+		//if 0, then either 0 or denormal/subnormal number
+		//if 255, then chances are that it is NaN or inf
+		random_exponent = rand()%(256); //8 bits
+	}
+	random_mantissa = rand()%(1024*1024*8); //23 bits
+	float rand_float = 0.0;
+	gen_float_from_man_exp(random_sign, random_exponent, random_mantissa, &rand_float);
+	return rand_float;
 }
 

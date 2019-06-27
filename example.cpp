@@ -11,4 +11,6 @@ int main(){
 	gen_float_from_man_exp(0, 127, 3, float_mem);
 	cout<<*((float*)float_mem)<<endl;
 	print_bits_long_type(float_mem, true);
+	for(int i=0; i<100; i++)
+		cout<<gen_random_valid_float()<<endl;
 }
