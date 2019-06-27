@@ -8,7 +8,7 @@ using namespace std;
 #define DOUBLE
 
 void bit_manip_inside_byte(int bit /*0/1*/, int location, void* number){
-	if(location >= 8){
+	if(location >= 8 || location < 0){ 
 		cout<<"Cannot set to farther than 8th bit"<<endl;
 		return;
 	}
@@ -29,7 +29,7 @@ void bit_manip_inside_byte(int bit /*0/1*/, int location, void* number){
 //Print from LSB to MSB
 void print_bits_inside_byte(void* number, bool new_line = false){
 	for(int i=0; i<8; i++){
-		int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
+		int bit = ((*((unsigned long*)number)) >> i) & 1UL;
 		cout<<bit<<" ";
 	}
 	if(new_line)
@@ -52,13 +52,13 @@ void print_bits_long_type(void* number, bool is_float = false){
 		int i = 0;
 #ifdef DOUBLE
 		for(i=0; i<52; i++){
-			int bit = ((*((long long int*)number)) >> i) & 1UL; 
+			int bit = ((*((long long int*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 		}
 
 #else
 		for(i=0; i<23; i++){
-			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
+			int bit = ((*((unsigned long*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 		}
 #endif
@@ -66,26 +66,26 @@ void print_bits_long_type(void* number, bool is_float = false){
 		cout<<" | exp (parsed normally, no rev)=> ";
 #ifdef DOUBLE
 		for(; i<63; i++){
-			int bit = ((*((long long int*)number)) >> i) & 1UL; 
+			int bit = ((*((long long int*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 		}
-	
+
 #else
 		for(; i<31; i++){
-			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
+			int bit = ((*((unsigned long*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 		}
 #endif
 		cout<<" | sign => ";
 #ifdef DOUBLE
 		for(; i<64; i++){
-			int bit = ((*((long long int*)number)) >> i) & 1UL; 
+			int bit = ((*((long long int*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 		}
 
 #else
 		for(; i<32; i++){
-			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
+			int bit = ((*((unsigned long*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 		}
 #endif
@@ -108,7 +108,7 @@ void bit_manip_long_type(int bit, int location, void* number){
 
 //Returns int 0/1 as the bit.
 int extract_bit_from_byte(int position, void* number){
-	return ((*((unsigned long*)number)) >> position) & 1UL;  	
+	return ((*((unsigned long*)number)) >> position) & 1UL;
 }
 
 //For both double and float
@@ -152,7 +152,7 @@ void gen_float_from_man_exp(int sign /*1 -ve*/, long long int exponent /*<2pow8-
 		set_x_bits_to_little_endian_float(52, &mantissa, number); //parsed in little endian form.
 		set_x_bits_to(11, 52, &exponent, number);
 		bit_manip_long_type(sign, 63, number); //Set sign.
-	
+
 #else
 		set_x_bits_to_little_endian_float(23, &mantissa, number); //parsed in little endian form.
 		set_x_bits_to(8, 23, &exponent, number);
@@ -174,7 +174,7 @@ void* gen_random_valid_float(){
 	}
 	long long int modulus = (1024*1024*1024);
 	modulus *= 1024;
-       	modulus *= 1024*4;	
+       	modulus *= 1024*4;
 	random_mantissa = rand()%(modulus); //52 bits
 	void* rand_double = malloc(8);
 	gen_float_from_man_exp(random_sign, random_exponent, random_mantissa, rand_double);
