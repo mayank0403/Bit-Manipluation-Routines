@@ -9,8 +9,9 @@ int main(){
 	//bit_manip_long_type(1, 31, float_mem);
 	//print_bits_long_type(float_mem);
 	//cout<<*((int*)float_mem)<<endl;
-	//gen_float_from_man_exp(1, 127, 3, float_mem); //127 bias
-	//gen_float_from_man_exp(1, 1023, 3, double_mem); //1023 bias
+	gen_float_from_man_exp(1, 127, 9, float_mem); //127 bias
+	//gen_float_from_man_exp(0, 1023, 3, double_mem); //1023 bias
+	print_bits_long_type(float_mem, true);
 	//double a = 1.5;
 	//print_bits_long_type(&a, true);
 	//cout<<*((float*)float_mem)<<endl;
@@ -19,6 +20,6 @@ int main(){
 	//print_bits_long_type(double_mem, true);
 	//for(int i=0; i<100; i++)
 		//cout<<get_random_float()<<endl;
-	for(int i=0; i<100; i++)
-		cout<<get_random_double()<<endl;
+	//for(int i=0; i<100; i++)
+		//cout<<get_random_double()<<endl;
 }

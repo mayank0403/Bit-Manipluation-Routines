@@ -5,7 +5,10 @@
 using namespace std;
 
 // Use double precisions for floats
-#define DOUBLE
+//#define DOUBLE
+
+// Print mantissa, sign and exponent as integers
+#define PARSE_PRINT
 
 void bit_manip_inside_byte(int bit /*0/1*/, int location, void* number){
 	if(location >= 8){
@@ -38,6 +41,8 @@ void print_bits_inside_byte(void* number, bool new_line = false){
 		cout<<endl;
 }
 
+void bit_manip_long_type(int bit, int location, void* number);
+
 //This will print bits of all 4 bytes at a mem location
 void print_bits_long_type(void* number, bool is_float = false){
 	if(is_float){
@@ -50,16 +55,22 @@ void print_bits_long_type(void* number, bool is_float = false){
 		}
 		cout<<" | man (reverse of expected) => ";
 		int i = 0;
+		long long int mantissa, exponent;
+		mantissa = 0ULL;
+		exponent = 0ULL;
+		int sign;
 #ifdef DOUBLE
 		for(i=0; i<52; i++){
 			int bit = ((*((long long int*)number)) >> i) & 1UL; 
 			cout<<bit<<" ";
+			bit_manip_long_type(bit, 51-i, &mantissa);
 		}
 
 #else
 		for(i=0; i<23; i++){
 			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
 			cout<<bit<<" ";
+			bit_manip_long_type(bit, 22-i, &mantissa);
 		}
 #endif
 		cout<<". 1";
@@ -68,12 +79,14 @@ void print_bits_long_type(void* number, bool is_float = false){
 		for(; i<63; i++){
 			int bit = ((*((long long int*)number)) >> i) & 1UL; 
 			cout<<bit<<" ";
+			bit_manip_long_type(bit, i-52, &exponent);
 		}
 	
 #else
 		for(; i<31; i++){
 			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
 			cout<<bit<<" ";
+			bit_manip_long_type(bit, i-23, &exponent);
 		}
 #endif
 		cout<<" | sign => ";
@@ -81,16 +94,21 @@ void print_bits_long_type(void* number, bool is_float = false){
 		for(; i<64; i++){
 			int bit = ((*((long long int*)number)) >> i) & 1UL; 
 			cout<<bit<<" ";
+			sign = -1*bit - 1*(bit-1);
 		}
 
 #else
 		for(; i<32; i++){
 			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
 			cout<<bit<<" ";
+			sign = -1*bit - 1*(bit-1);
+ 
 		}
 #endif
 		cout<<" |"<<endl;
-
+#ifdef PARSE_PRINT
+		cout<<"Sign = "<<sign<<" | Mantissa = "<<mantissa<<" | Exponent = "<<exponent<<endl;
+#endif
 		return;
 	}
 	for(int i=0; i<4; i++){
