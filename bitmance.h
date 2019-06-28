@@ -156,7 +156,7 @@ void set_x_bits_to_little_endian_float(int x, void* from, void* to){
 //Generate a float value from integer representations of mantissa and exponent.
 void gen_float_from_man_exp(int sign /*1 -ve*/, long long int exponent /*<2pow8-- actual exponent = exponent-127*/, long long int mantissa /*<2pow23*/, void* number){
 	if(__BYTE_ORDER == __BIG_ENDIAN){
-		cout<<"BIG ENDIAN"<<endl;
+		//cout<<"BIG ENDIAN"<<endl;
 #ifdef DOUBLE
 		bit_manip_long_type(sign, 0, number); //Set sign.
 		set_x_bits_to(11, 1, &exponent, number);
@@ -169,7 +169,7 @@ void gen_float_from_man_exp(int sign /*1 -ve*/, long long int exponent /*<2pow8-
 #endif
 	}
 	else if(__BYTE_ORDER == LITTLE_ENDIAN){
-		cout<<"LITTLE ENDIAN"<<endl;
+		//cout<<"LITTLE ENDIAN"<<endl;
 #ifdef DOUBLE
 		set_x_bits_to_little_endian_float(52, &mantissa, number); //parsed in little endian form.
 		set_x_bits_to(11, 52, &exponent, number);
@@ -231,8 +231,9 @@ double get_random_double(){
 }
 
 //This will compare floats/doubles bit by bit
-//Return true if equal, false if not.
-bool compare_floats(void* a, void* b){
+//Return 0 if values match, 1 if one is denormal
+//2 if one is INF, 3 if one is NaN and -1 if values don't match.
+int compare_floats(void* a, void* b){
 	int i = 0;
 	long long int mantissa1, exponent1, mantissa2, exponent2;
 	mantissa1 = 0ULL;
@@ -289,9 +290,32 @@ bool compare_floats(void* a, void* b){
 	}
 #endif
 	if(sign1==sign2 && mantissa1==mantissa2 && exponent1==exponent2){
-		return true;
+		return 0;
 	}
-	return false;
+	else if(exponent1==0 && exponent2==0){
+		return 1; //One of them is a subnormal number.
+	}
+#ifdef DOUBLE
+	else if(exponent1==2047 && exponent2==2047){
+		if(mantissa1==0 || mantissa2==0){
+			return 2; //One of them in INF.
+		}
+		else{
+			return 3; //One of them is a NaN.
+		}
+	}
+#else
+	else if(exponent1==255 && exponent2==255){
+		if(mantissa1==0 || mantissa2==0){
+			return 2; //One of them in INF.
+		}
+		else{
+			return 3; //One of them is a NaN.
+		}
+	}
+#endif
+	//Else the numbers are not equal and valid.
+	return -1;
 }
 
 
