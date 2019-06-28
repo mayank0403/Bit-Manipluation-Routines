@@ -5,7 +5,7 @@
 using namespace std;
 
 // Use double precisions for floats
-//#define DOUBLE
+#define DOUBLE
 
 // Print mantissa, sign and exponent as integers
 #define PARSE_PRINT
@@ -32,7 +32,7 @@ void bit_manip_inside_byte(int bit /*0/1*/, int location, void* number){
 //Print from LSB to MSB
 void print_bits_inside_byte(void* number, bool new_line = false){
 	for(int i=0; i<8; i++){
-		int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
+		int bit = ((*((unsigned long*)number)) >> i) & 1UL;
 		cout<<bit<<" ";
 	}
 	if(new_line)
@@ -61,14 +61,14 @@ void print_bits_long_type(void* number, bool is_float = false){
 		int sign;
 #ifdef DOUBLE
 		for(i=0; i<52; i++){
-			int bit = ((*((long long int*)number)) >> i) & 1UL; 
+			int bit = ((*((long long int*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 			bit_manip_long_type(bit, 51-i, &mantissa);
 		}
 
 #else
 		for(i=0; i<23; i++){
-			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
+			int bit = ((*((unsigned long*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 			bit_manip_long_type(bit, 22-i, &mantissa);
 		}
@@ -77,14 +77,14 @@ void print_bits_long_type(void* number, bool is_float = false){
 		cout<<" | exp (parsed normally, no rev)=> ";
 #ifdef DOUBLE
 		for(; i<63; i++){
-			int bit = ((*((long long int*)number)) >> i) & 1UL; 
+			int bit = ((*((long long int*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 			bit_manip_long_type(bit, i-52, &exponent);
 		}
-	
+
 #else
 		for(; i<31; i++){
-			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
+			int bit = ((*((unsigned long*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 			bit_manip_long_type(bit, i-23, &exponent);
 		}
@@ -92,22 +92,26 @@ void print_bits_long_type(void* number, bool is_float = false){
 		cout<<" | sign => ";
 #ifdef DOUBLE
 		for(; i<64; i++){
-			int bit = ((*((long long int*)number)) >> i) & 1UL; 
+			int bit = ((*((long long int*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 			sign = -1*bit - 1*(bit-1);
 		}
 
 #else
 		for(; i<32; i++){
-			int bit = ((*((unsigned long*)number)) >> i) & 1UL; 
+			int bit = ((*((unsigned long*)number)) >> i) & 1UL;
 			cout<<bit<<" ";
 			sign = -1*bit - 1*(bit-1);
- 
+
 		}
 #endif
 		cout<<" |"<<endl;
 #ifdef PARSE_PRINT
-		cout<<"Sign = "<<sign<<" | Mantissa = "<<mantissa<<" | Exponent = "<<exponent<<endl;
+#ifdef DOUBLE
+		cout<<"Sign = "<<sign<<" | Mantissa = "<<mantissa<<" | Exponent(-bias) = "<<exponent-1023<<endl;
+#else
+		cout<<"Sign = "<<sign<<" | Mantissa = "<<mantissa<<" | Exponent(-bias) = "<<exponent-127<<endl;
+#endif
 #endif
 		return;
 	}
@@ -126,7 +130,7 @@ void bit_manip_long_type(int bit, int location, void* number){
 
 //Returns int 0/1 as the bit.
 int extract_bit_from_byte(int position, void* number){
-	return ((*((unsigned long*)number)) >> position) & 1UL;  	
+	return ((*((unsigned long*)number)) >> position) & 1UL;
 }
 
 //For both double and float
@@ -170,7 +174,7 @@ void gen_float_from_man_exp(int sign /*1 -ve*/, long long int exponent /*<2pow8-
 		set_x_bits_to_little_endian_float(52, &mantissa, number); //parsed in little endian form.
 		set_x_bits_to(11, 52, &exponent, number);
 		bit_manip_long_type(sign, 63, number); //Set sign.
-	
+
 #else
 		set_x_bits_to_little_endian_float(23, &mantissa, number); //parsed in little endian form.
 		set_x_bits_to(8, 23, &exponent, number);
@@ -192,7 +196,7 @@ void* gen_random_valid_float(){
 	}
 	long long int modulus = (1024*1024*1024);
 	modulus *= 1024;
-       	modulus *= 1024*4;	
+	modulus *= 1024*4;
 	random_mantissa = rand()%(modulus); //52 bits
 	void* rand_double = malloc(8);
 	gen_float_from_man_exp(random_sign, random_exponent, random_mantissa, rand_double);
@@ -225,3 +229,69 @@ double get_random_double(){
 	memcpy(&value, rand_val, 8);
 	return value;
 }
+
+//This will compare floats/doubles bit by bit
+//Return true if equal, false if not.
+bool compare_floats(void* a, void* b){
+	int i = 0;
+	long long int mantissa1, exponent1, mantissa2, exponent2;
+	mantissa1 = 0ULL;
+	exponent1 = 0ULL;
+	mantissa2 = 0ULL;
+	exponent2 = 0ULL;
+	int sign1, sign2;
+#ifdef DOUBLE
+	for(i=0; i<52; i++){
+		int bit1 = ((*((long long int*)a)) >> i) & 1UL;
+		bit_manip_long_type(bit1, 51-i, &mantissa1);
+		int bit2 = ((*((long long int*)b)) >> i) & 1UL;
+		bit_manip_long_type(bit2, 51-i, &mantissa2);
+	}
+
+#else
+	for(i=0; i<23; i++){
+		int bit1 = ((*((unsigned long*)a)) >> i) & 1UL;
+		bit_manip_long_type(bit1, 22-i, &mantissa1);
+		int bit2 = ((*((unsigned long*)b)) >> i) & 1UL;
+		bit_manip_long_type(bit2, 22-i, &mantissa2);
+	}
+#endif
+#ifdef DOUBLE
+	for(; i<63; i++){
+		int bit1 = ((*((long long int*)a)) >> i) & 1UL;
+		bit_manip_long_type(bit1, i-52, &exponent1);
+		int bit2 = ((*((long long int*)b)) >> i) & 1UL;
+		bit_manip_long_type(bit2, i-52, &exponent2);
+	}
+
+#else
+	for(; i<31; i++){
+		int bit1 = ((*((unsigned long*)a)) >> i) & 1UL;
+		bit_manip_long_type(bit1, i-23, &exponent1);
+		int bit2 = ((*((unsigned long*)b)) >> i) & 1UL;
+		bit_manip_long_type(bit2, i-23, &exponent2);
+	}
+#endif
+#ifdef DOUBLE
+	for(; i<64; i++){
+		int bit1 = ((*((long long int*)a)) >> i) & 1UL;
+		sign1 = -1*bit1 - 1*(bit1-1);
+		int bit2 = ((*((long long int*)b)) >> i) & 1UL;
+		sign2 = -1*bit2 - 1*(bit2-1);
+	}
+
+#else
+	for(; i<32; i++){
+		int bit1 = ((*((unsigned long*)a)) >> i) & 1UL;
+		sign1 = -1*bit1 - 1*(bit1-1);
+		int bit2 = ((*((unsigned long*)b)) >> i) & 1UL;
+		sign2 = -1*bit2 - 1*(bit2-1);
+	}
+#endif
+	if(sign1==sign2 && mantissa1==mantissa2 && exponent1==exponent2){
+		return true;
+	}
+	return false;
+}
+
+
